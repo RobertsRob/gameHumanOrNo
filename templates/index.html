@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Async OpenAI Flask App</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="terminal">
+        <h1>root@chat:~# <span class="blinking">_</span></h1>
+        
+        <label for="prompt">Enter prompt:</label><br>
+        <textarea id="prompt" rows="4" cols="60" placeholder="Type your message here..."></textarea><br>
+        <button onclick="sendPrompt()">Send</button>
+
+        <h2>Response:</h2>
+        <pre id="response">Waiting for input...</pre>
+    </div>
+
+
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById('prompt').value;
+            document.getElementById('response').textContent = 'Loading...';
+
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ prompt })
+            });
+
+            const data = await res.json();
+            document.getElementById('response').textContent = data.response || data.error;
+        }
+    </script>
+</body>
+</html>
