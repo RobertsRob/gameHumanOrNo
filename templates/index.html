@@ -56,6 +56,11 @@
                 const botMessage = data.response || data.error || 'Error';
                 messages[messages.length - 1].content = botMessage;
 
+                let userTextSpeed = userMessage.length / (startsMessaging != -1 ? Date.now() - startsMessaging : -1);
+                let timeToWait = startsMessaging * botMessage.length - 900;
+                console.log(userTextSpeed);
+                await wait(timeToWait >= 0 ? timeToWait : 0);
+
                 // Обновить текст в уже добавленном элементе
                 botPlaceholder.textContent = `Bot: ${botMessage}`;
             } catch (err) {
@@ -63,6 +68,7 @@
                 messages[messages.length - 1].content = errorMessage;
                 botPlaceholder.textContent = `Bot: ${errorMessage}`;
             }
+            startsMessaging = -1;
         }
 
         function appendMessage(role, content) {
@@ -75,26 +81,31 @@
         }
         
 
-        document.addEventListener("keydown", e => {
+        document.getElementById("prompt").addEventListener("keydown", function(e) {
             const k = e.key;
             if (/^[a-zA-Z0-9]$/.test(k) || ["/", "!", "*", "-", "+", ".", ",", "@", "#", "$"].includes(k)) {
                 if(startsMessaging == -1) {
                     startsMessaging = Date.now();
                 }
             }
-            if( document.getElementById("prompt").value.length == 0){
-                console.log("Empty");
-                startsMessaging = -1;
-            }
         });
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
         
         function update() {
             let timeWriting = startsMessaging != -1 ? Date.now() - startsMessaging : -1;
             document.getElementById("time_writing").innerText = timeWriting;
+            
+            let val = document.getElementById("prompt").value;
+            if ((val == "" || val == undefined)) {
+                startsMessaging = -1;
+            }
         }
 
 
-        setInterval(update, 1);
+        setInterval(update, 20);
 
     </script>
 
