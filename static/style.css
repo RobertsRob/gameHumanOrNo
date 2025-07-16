@@ -57,3 +57,41 @@ h1, h2, label {
 @keyframes blink {
     50% { opacity: 0; }
 }
+
+.chat_area {
+    background-color: #000;
+    border: 1px solid #00ff00;
+    padding: 10px;
+    height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message {
+    padding: 6px;
+    border-left: 3px solid #00ff00;
+    background-color: #111;
+}
+
+.message.user {
+    color: #00ff00;
+}
+
+.message.bot {
+    color: #00ffaa;
+}
+
+.input_area {
+    margin-top: 10px;
+}
+
+.start_chat{
+    color: #00ff00;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+}

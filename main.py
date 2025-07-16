@@ -8,6 +8,8 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
+chat_history = []
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -22,9 +24,7 @@ def chat():
 
         # OpenAI request
         try:
-            response = client.responses.create(
-            model="gpt-4.1",
-            input=[
+            chat_history.append(
                 {
                 "role": "user",
                 "content": [
@@ -33,8 +33,11 @@ def chat():
                     "text": user_prompt
                     }
                 ]
-                }
-            ],
+                })
+            
+            response = client.responses.create(
+            model="gpt-4.1",
+            input=chat_history,
             reasoning={},
             tools=[],
             temperature=1,
@@ -44,6 +47,20 @@ def chat():
             )
 
             response_text = response.output[0].content[0].text
+            response_id = response.output[0].id
+
+            chat_history.append({
+            "id": response_id,
+            "role": "assistant",
+            "content": [
+                {
+                "type": "output_text",
+                "text": response_text
+                }
+            ]
+            })
+
+
             return jsonify({"response": response_text})
         
         except Exception as e:

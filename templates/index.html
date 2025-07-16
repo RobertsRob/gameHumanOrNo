@@ -7,30 +7,73 @@
 <body>
     <div class="terminal">
         <h1>root@chat:~# <span class="blinking">_</span></h1>
-        
-        <label for="prompt">Enter prompt:</label><br>
-        <textarea id="prompt" rows="4" cols="60" placeholder="Type your message here..."></textarea><br>
-        <button onclick="sendPrompt()">Send</button>
 
         <h2>Response:</h2>
-        <pre id="response">Waiting for input...</pre>
+        <div class="chat_area" id="chat_area">
+            <p class="start_chat">Start chatting...</p>
+        </div>
+        <div class="input_area">
+            <textarea id="prompt" rows="2" cols="60" placeholder="Type your message here..."></textarea>
+            <button onclick="sendPrompt()">Send</button>
+        </div>
+
     </div>
 
 
     <script>
+        const messages = [];
+
+        document.getElementById('prompt').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendPrompt();
+            }});
+
         async function sendPrompt() {
-            const prompt = document.getElementById('prompt').value;
-            document.getElementById('response').textContent = 'Loading...';
+            const promptInput = document.getElementById('prompt');
+            const chatArea = document.getElementById('chat_area');
+            const userMessage = promptInput.value.trim();
+            if (!userMessage) return;
 
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ prompt })
-            });
+            // Добавить сообщение пользователя
+            messages.push({ role: 'user', content: userMessage });
+            appendMessage('user', userMessage);
+            promptInput.value = '';
 
-            const data = await res.json();
-            document.getElementById('response').textContent = data.response || data.error;
+            // Добавить временное сообщение бота "Thinking..."
+            const botPlaceholder = appendMessage('bot', 'Thinking...');
+            messages.push({ role: 'bot', content: 'Thinking...' });
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userMessage })
+                });
+
+                const data = await res.json();
+                const botMessage = data.response || data.error || 'Error';
+                messages[messages.length - 1].content = botMessage;
+
+                // Обновить текст в уже добавленном элементе
+                botPlaceholder.textContent = `Bot: ${botMessage}`;
+            } catch (err) {
+                const errorMessage = 'Request failed.';
+                messages[messages.length - 1].content = errorMessage;
+                botPlaceholder.textContent = `Bot: ${errorMessage}`;
+            }
+        }
+
+        function appendMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.textContent = role === 'user' ? `You: ${content}` : `Bot: ${content}`;
+            document.getElementById('chat_area').appendChild(div);
+            document.getElementById('chat_area').scrollTop = document.getElementById('chat_area').scrollHeight;
+            return div; // Вернём div, чтобы его потом обновить
         }
     </script>
+
+
 </body>
 </html>
