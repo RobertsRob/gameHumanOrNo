@@ -16,12 +16,13 @@
             <textarea id="prompt" rows="2" cols="60" placeholder="Type your message here..."></textarea>
             <button onclick="sendPrompt()">Send</button>
         </div>
-
+        <p id="time_writing"></p>
     </div>
 
 
     <script>
         const messages = [];
+        let startsMessaging = -1; // ms = s * 10-3E
 
         document.getElementById('prompt').addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -72,6 +73,29 @@
             document.getElementById('chat_area').scrollTop = document.getElementById('chat_area').scrollHeight;
             return div; // Вернём div, чтобы его потом обновить
         }
+        
+
+        document.addEventListener("keydown", e => {
+            const k = e.key;
+            if (/^[a-zA-Z0-9]$/.test(k) || ["/", "!", "*", "-", "+", ".", ",", "@", "#", "$"].includes(k)) {
+                if(startsMessaging == -1) {
+                    startsMessaging = Date.now();
+                }
+            }
+            if( document.getElementById("prompt").value.length == 0){
+                console.log("Empty");
+                startsMessaging = -1;
+            }
+        });
+        
+        function update() {
+            let timeWriting = startsMessaging != -1 ? Date.now() - startsMessaging : -1;
+            document.getElementById("time_writing").innerText = timeWriting;
+        }
+
+
+        setInterval(update, 1);
+
     </script>
 
 

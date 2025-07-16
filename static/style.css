@@ -19,7 +19,7 @@ textarea {
     background-color: #000;
     color: #00ff00;
     border: 1px solid #00ff00;
-    width: 100%;
+    width: 680px;
     padding: 10px;
     font-family: 'Courier New', Courier, monospace;
     resize: vertical;
@@ -29,9 +29,13 @@ button {
     background-color: #000;
     color: #00ff00;
     border: 1px solid #00ff00;
-    padding: 10px 20px;
     font-family: 'Courier New', Courier, monospace;
     cursor: pointer;
+    height: 52px;
+    width: 88px;
+    display: inline;
+    position: relative;
+    top: -22.5px;
 }
 
 button:hover {
