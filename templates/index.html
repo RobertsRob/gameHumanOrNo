@@ -6,7 +6,10 @@
 </head>
 <body>
     <div class="terminal">
-        <h1>root@chat:~# <span class="blinking">_</span></h1>
+        <h1 style="display: flex; justify-content: space-between; align-items: center;">
+            <span>root@chat:~# <span class="blinking">_</span></span>
+            <span id="countdown" style="font-size: 18px;">01:30</span>
+        </h1>
 
         <h2>Response:</h2>
         <div class="chat_area" id="chat_area">
@@ -16,13 +19,16 @@
             <textarea id="prompt" rows="2" cols="60" placeholder="Type your message here..."></textarea>
             <button onclick="sendPrompt()">Send</button>
         </div>
-        <p id="time_writing"></p>
+        <p id="time_writing" style="display: none; visibility: hidden;"></p>
     </div>
 
 
     <script>
         const messages = [];
         let startsMessaging = -1; // ms = s * 10-3E
+        let pendingRequest = false;
+        let totalSeconds = 90;
+        let isRulesBroken = false;
 
         document.getElementById('prompt').addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -30,7 +36,55 @@
                 sendPrompt();
             }});
 
+        const wait = t => new Promise((resolve, reject) => setTimeout(resolve, t))
+
+        window.addEventListener('load', function() {
+            const random = Math.random();
+            if (random < 0.25) {
+                firstMessage();
+        }});
+
+        async function firstMessage() {
+        if(pendingRequest) return;
+        pendingRequest = true;
+        const promptInput = document.getElementById('prompt');
+            const chatArea = document.getElementById('chat_area');
+            const userMessage = "^^^ SYSTEM MESSAGE: start the chat!";
+
+            // Добавить временное сообщение бота "Thinking..."
+            const botPlaceholder = appendMessage('Person 2', 'Thinking...');
+            messages.push({ role: 'Person 2', content: 'Thinking...' });
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userMessage })
+                });
+                
+                const data = await res.json();
+                const botMessage = data.response || data.error || 'Error';
+                messages[messages.length - 1].content = botMessage;
+
+                await new Promise(requestAnimationFrame);
+                const wait2sec = await wait(1500);
+
+                // Обновить текст в уже добавленном элементе
+                botPlaceholder.textContent = `Person 2: ${botMessage}`;
+            } catch (err) {
+                const errorMessage = 'Request failed.';
+                messages[messages.length - 1].content = errorMessage;
+                botPlaceholder.textContent = `Person 2: ${errorMessage}`;
+            }
+            pendingRequest = false;
+            startsMessaging = -1;
+        }
+
         async function sendPrompt() {
+            if(isRulesBroken) return;
+            if(pendingRequest) return;
+            pendingRequest = true;
+
             const promptInput = document.getElementById('prompt');
             const chatArea = document.getElementById('chat_area');
             const userMessage = promptInput.value.trim();
@@ -42,39 +96,55 @@
             promptInput.value = '';
 
             // Добавить временное сообщение бота "Thinking..."
-            const botPlaceholder = appendMessage('bot', 'Thinking...');
-            messages.push({ role: 'bot', content: 'Thinking...' });
+            const botPlaceholder = appendMessage('Person 2', 'Thinking...');
+            messages.push({ role: 'Person 2', content: 'Thinking...' });
 
             try {
+                let chatCompletionStartTime = Date.now();
+                let userTextSpeed = userMessage.length / ((Date.now() - startsMessaging) / 1000);
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: userMessage })
                 });
-
+                
                 const data = await res.json();
                 const botMessage = data.response || data.error || 'Error';
                 messages[messages.length - 1].content = botMessage;
 
-                let userTextSpeed = userMessage.length / (startsMessaging != -1 ? Date.now() - startsMessaging : -1);
-                let timeToWait = startsMessaging * botMessage.length - 900;
-                console.log(userTextSpeed);
-                await wait(timeToWait >= 0 ? timeToWait : 0);
+                if (botMessage.includes("Internet conection error")) {
+                    // console.log("123");
+                    isRulesBroken = true;
+                    totalSeconds = 8;
+                    
+                }
+
+                let timeToWait = (userTextSpeed * botMessage.length) - (Date.now() - chatCompletionStartTime) / 1000;
+                timeToWait *= 0.99;
+                // console.log(`user text speed: ${userTextSpeed}, time to wait: ${timeToWait}, chat: ${(Date.now() - chatCompletionStartTime) / 1000}, bot message: ${botMessage.length}`);
+                if(isRulesBroken == false) await new Promise(requestAnimationFrame);
+                
+                const wait2sec = await wait(timeToWait * 1000 < (Date.now() - startsMessaging) ? timeToWait * 1000 : (Date.now() - startsMessaging) * 1.2);
+                // console.log("ended");
 
                 // Обновить текст в уже добавленном элементе
-                botPlaceholder.textContent = `Bot: ${botMessage}`;
+                botPlaceholder.textContent = `Person 2: ${botMessage}`;
             } catch (err) {
                 const errorMessage = 'Request failed.';
                 messages[messages.length - 1].content = errorMessage;
-                botPlaceholder.textContent = `Bot: ${errorMessage}`;
+                botPlaceholder.textContent = `Person 2: ${errorMessage}`;
             }
+            pendingRequest = false;
             startsMessaging = -1;
         }
 
         function appendMessage(role, content) {
             const div = document.createElement('div');
-            div.className = `message ${role}`;
-            div.textContent = role === 'user' ? `You: ${content}` : `Bot: ${content}`;
+            if(isRulesBroken)
+                div.className = `message error`;
+            else div.className = `message ${role == "Person 2" ? "person_2" : "user"}`;
+
+            div.textContent = role === 'user' ? `You: ${content}` : `Person 2: ${content}`;
             document.getElementById('chat_area').appendChild(div);
             document.getElementById('chat_area').scrollTop = document.getElementById('chat_area').scrollHeight;
             return div; // Вернём div, чтобы его потом обновить
@@ -89,23 +159,61 @@
                 }
             }
         });
-
-        function wait(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
         
         function update() {
             let timeWriting = startsMessaging != -1 ? Date.now() - startsMessaging : -1;
             document.getElementById("time_writing").innerText = timeWriting;
             
             let val = document.getElementById("prompt").value;
-            if ((val == "" || val == undefined)) {
+            if ((val == "" || val == undefined) && pendingRequest == false) {
                 startsMessaging = -1;
             }
+
+            if(pendingRequest) {
+                document.getElementById("prompt").readOnly = true;
+                document.getElementById("prompt").disabled = true;
+            } else {
+                document.getElementById("prompt").readOnly = false;
+                document.getElementById("prompt").disabled = false;
+            }
+        }
+        
+        
+        function updateTimerDisplay(secondsLeft) {
+            const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+            const seconds = (secondsLeft % 60).toString().padStart(2, '0');
+            document.getElementById('countdown').textContent = `${minutes}:${seconds}`;
         }
 
+        function startTimer(duration) {
+            let remaining = duration;
+            updateTimerDisplay(remaining);
+
+            const interval = setInterval(() => {
+                remaining--;
+                updateTimerDisplay(remaining);
+
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    onTimerEnd(); // Call your function here
+                }
+            }, 1000);
+        }
+
+        function onTimerEnd() {
+            console.log("Timer finished!"); 
+            // Do something — e.g., auto-send prompt, redirect, etc.
+            alert("Time's up!");
+        }
+
+        // Start the timer on page load
+        window.onload = () => {
+            startTimer(totalSeconds);
+        };
 
         setInterval(update, 20);
+        
+
 
     </script>
 

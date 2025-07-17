@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Let's Detect Who It Is</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+        .centered-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 88vh;
+            text-align: center;
+        }
+
+        .main-title {
+            font-size: 48px;
+            margin-bottom: 40px;
+        }
+
+        .start-button {
+            font-size: 20px;
+            padding: 15px 30px;
+            height: auto;
+            width: auto;
+        }
+
+        .blinking-cursor {
+            font-weight: bold;
+            animation: blink 1s step-start infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal centered-container">
+        <h1 class="main-title">root@terminal:~# Let's detect who it is<span class="blinking-cursor">_</span></h1>
+        <button class="start-button" onclick="location.href='chatting'">Start</button>
+    </div>
+</body>
+</html>
