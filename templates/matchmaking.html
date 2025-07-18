@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finding Someone...</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+        body{
+            background-color: #000000;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .loading-message {
+            font-size: 36px;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .blinking-cursor {
+            animation: blink 1s step-start infinite;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal loading-container">
+        <div class="loading-message">
+            root@connection:~# Finding human or AI to talk with<span class="blinking-cursor">_</span>
+        </div>
+    </div>
+
+    <script>
+        function getRandomDelay(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function redirectAfterDelay() {
+            const delaySeconds = getRandomDelay(3, 7);
+            setTimeout(() => {
+                window.location.href = "/chatting";
+            }, delaySeconds * 1000);
+        }
+
+        // Start on page load
+        window.onload = redirectAfterDelay;
+    </script>
+</body>
+</html>

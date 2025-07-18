@@ -24,6 +24,10 @@ chat_history = [
 def index():
     return render_template('welcome_page.html')
 
+@app.route('/match')
+def match():
+    return render_template('matchmaking.html')
+
 
 @app.route('/chatting')
 def chatting():
