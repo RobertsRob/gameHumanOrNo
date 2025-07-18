@@ -53,8 +53,8 @@
             const userMessage = "^^^ SYSTEM MESSAGE: start the chat!";
 
             // Добавить временное сообщение бота "Thinking..."
-            const botPlaceholder = appendMessage('Person 2', 'Thinking...');
-            messages.push({ role: 'Person 2', content: 'Thinking...' });
+            const botPlaceholder = appendMessage('Person 2', 'Writing...');
+            messages.push({ role: 'Person 2', content: 'Writing...' });
 
             try {
                 const res = await fetch('/api/chat', {
@@ -97,8 +97,8 @@
             promptInput.value = '';
 
             // Добавить временное сообщение бота "Thinking..."
-            const botPlaceholder = appendMessage('Person 2', 'Thinking...');
-            messages.push({ role: 'Person 2', content: 'Thinking...' });
+            const botPlaceholder = appendMessage('Person 2', 'Writing...');
+            messages.push({ role: 'Person 2', content: 'Writing...' });
 
             try {
                 let chatCompletionStartTime = Date.now();
