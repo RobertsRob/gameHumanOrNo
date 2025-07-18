@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guess Count</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+        .centered-number {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 88vh;
+            text-align: center;
+        }
+
+        .number-display {
+            font-size: 120px;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .label {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .blinking-cursor {
+            animation: blink 1s step-start infinite;
+        }
+
+        .delete-button {
+            margin-top: 40px;
+            padding: 15px 30px;
+            font-size: 18px;
+            width: 150px;
+            height: 73px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal centered-number">
+        <div class="label">root@tracker:~# Human Guesses <span class="blinking-cursor">_</span></div>
+        <div id="humanGuesesDisp" class="number-display">0</div>
+        <button class="delete-button" onclick="deleteInfo()">Delete Info</button>
+    </div>
+
+    <script>
+        
+
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+
+        window.onload = function() {
+            const guesses = getCookie("humanGueses") || "0"; // default to 0 if not found
+            document.getElementById("humanGuesesDisp").textContent = guesses;
+        };
+
+        function deleteInfo() {
+            // Your logic here — reset value, call backend, etc.
+            document.getElementById("humanGuesesDisp").textContent = 0;
+            document.cookie = "humanGueses=; path=/; max-age=0";
+            alert("Info deleted.");
+        }
+    </script>
+</body>
+</html>

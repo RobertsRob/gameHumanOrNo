@@ -3,6 +3,7 @@
 <head>
     <title>Async OpenAI Flask App</title>
     <link rel="stylesheet" href="static/style.css">
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="terminal">
@@ -115,7 +116,7 @@
                 if (botMessage.includes("Internet conection error")) {
                     // console.log("123");
                     isRulesBroken = true;
-                    totalSeconds = 8;
+                    setRemainingTime(8);
                     
                 }
 
@@ -178,32 +179,60 @@
             }
         }
         
-        
+
         function updateTimerDisplay(secondsLeft) {
             const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
             const seconds = (secondsLeft % 60).toString().padStart(2, '0');
             document.getElementById('countdown').textContent = `${minutes}:${seconds}`;
         }
 
+        let remaining;    // current countdown seconds
+        let interval;     // the interval ID
+
         function startTimer(duration) {
-            let remaining = duration;
+            remaining = duration;
             updateTimerDisplay(remaining);
 
-            const interval = setInterval(() => {
+            if (interval) clearInterval(interval);
+
+            interval = setInterval(() => {
                 remaining--;
                 updateTimerDisplay(remaining);
 
                 if (remaining <= 0) {
                     clearInterval(interval);
-                    onTimerEnd(); // Call your function here
+                    onTimerEnd();
                 }
             }, 1000);
         }
 
+        // Function to set remaining time dynamically
+        function setRemainingTime(newTime) {
+            remaining = newTime;
+            updateTimerDisplay(remaining);
+        }
+
         function onTimerEnd() {
             console.log("Timer finished!"); 
+
+            
+
             // Do something — e.g., auto-send prompt, redirect, etc.
-            alert("Time's up!");
+            // alert("Time's up!");
+            Swal.fire({
+                title: "Time is up!",
+                text: "It's time for voting!",
+                icon: "info",
+                background: "#000",
+                color: "#00ff00",
+                confirmButtonColor: "#00ff00",
+                customClass: {
+                    popup: "swal-dark"
+                }
+            }).then((result) => {
+             window.location.href = "/vote";
+            });
+           
         }
 
         // Start the timer on page load

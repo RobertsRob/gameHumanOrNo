@@ -31,7 +31,11 @@ def chatting():
 
 @app.route('/vote')
 def vote():
-    return render_template('index.html')
+    return render_template('vote.html')
+
+@app.route('/stat')
+def display():
+    return render_template('display.html')
 
 
 @app.route('/api/firstMsg', methods=['POST'])
